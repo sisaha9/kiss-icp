@@ -38,10 +38,10 @@ def generate_launch_description():
     return LaunchDescription(
         [
             # ROS2 parameters
-            DeclareLaunchArgument("topic", description="sensor_msg/PointCloud2 topic to process"),
+            DeclareLaunchArgument("topic", default_value="/points_raw/concatenated", description="sensor_msg/PointCloud2 topic to process"),
             DeclareLaunchArgument("bagfile", default_value=""),
             DeclareLaunchArgument("visualize", default_value="true"),
-            DeclareLaunchArgument("odom_frame", default_value="odom"),
+            DeclareLaunchArgument("odom_frame", default_value="map"),
             DeclareLaunchArgument("child_frame", default_value="base_link"),
             # KISS-ICP parameters
             DeclareLaunchArgument("deskew", default_value="false"),
@@ -66,6 +66,7 @@ def generate_launch_description():
                         "max_points_per_voxel": 20,
                         "initial_threshold": 2.0,
                         "min_motion_th": 0.1,
+                        "use_sim_time": True
                     }
                 ],
             ),
@@ -75,13 +76,6 @@ def generate_launch_description():
                 output={"both": "log"},
                 arguments=["-d", PathJoinSubstitution([current_pkg, "rviz", "kiss_icp_ros2.rviz"])],
                 condition=IfCondition(LaunchConfiguration("visualize")),
-            ),
-            ExecuteProcess(
-                cmd=["ros2", "bag", "play", LaunchConfiguration("bagfile")],
-                output="screen",
-                condition=IfCondition(
-                    PythonExpression(["'", LaunchConfiguration("bagfile"), "' != ''"])
-                ),
             ),
         ]
     )
